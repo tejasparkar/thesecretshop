@@ -24,8 +24,11 @@ export default function Cursor() {
 
     const over = (e) => {
       const target = e.target.closest('[data-cursor], a, button, input, select, textarea, label');
-      el.classList.toggle('is-hover', Boolean(target));
-      const text = target?.dataset?.cursor || '';
+      // data-cursor="none": get out of the way (e.g. over the keycap logos, so their press animation stays visible)
+      const off = target?.dataset?.cursor === 'none';
+      el.classList.toggle('is-off', off);
+      el.classList.toggle('is-hover', Boolean(target) && !off);
+      const text = off ? '' : target?.dataset?.cursor || '';
       label.current.textContent = text;
       el.classList.toggle('has-label', Boolean(text));
     };

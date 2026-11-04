@@ -3,10 +3,11 @@ import { Link, useOutletContext } from 'react-router-dom';
 import api from '../lib/api.js';
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../lib/gsap.js';
 import useReveal from '../hooks/useReveal.js';
-import Lines, { Chars } from '../components/Lines.jsx';
+import Lines from '../components/Lines.jsx';
 import Magnetic from '../components/Magnetic.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import Img from '../components/Img.jsx';
+import HeroScene from '../components/HeroScene.jsx';
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&w=2000&q=80';
 const ANATOMY_IMG = 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?auto=format&fit=crop&w=1400&q=80';
@@ -47,29 +48,44 @@ export default function Home() {
     const ctx = gsap.context(() => {
       gsap
         .timeline({ delay: 0.1 })
-        .from('.hero__title .char', { yPercent: 120, rotate: 6, duration: 1.2, ease: 'power4.out', stagger: 0.035 })
+        .from('.scene__mist', { opacity: 0, duration: 1.6, ease: 'power2.out' })
+        .from('.scene__emblem', { opacity: 0, scale: 0.9, transformOrigin: '50% 100%', duration: 1.4, ease: 'power3.out' }, 0)
+        .from('.scene__halo', { opacity: 0, scale: 0.4, duration: 1.4, ease: 'power3.out' }, 0.2)
+        .from('.scene__flare', { opacity: 0, scaleX: 0, duration: 1, ease: 'power3.out' }, 0.3)
+        .from('.scene__beam', { scaleY: 0, transformOrigin: '50% 100%', duration: 1, ease: 'power3.out', stagger: 0.1 }, 0.4)
+        .from('.scene__node', { opacity: 0, y: 24, duration: 0.9, ease: 'power3.out', stagger: { each: 0.07, from: 'random' } }, 0.5)
         .from('.hero__meta > *', { y: 20, opacity: 0, duration: 0.8, stagger: 0.1, ease: 'power3.out' }, '-=0.8')
         .from('.hero__media', { opacity: 0, duration: 1 }, '-=0.9');
     }, root);
     return () => ctx.revert();
   }, [introDone]);
 
+  // Zero-size clip window sitting on the emblem's sparkle, so the photo grows out of it.
+  const emblemReveal = () => {
+    const hero = document.querySelector('.hero')?.getBoundingClientRect();
+    const em = document.querySelector('.scene__emblem')?.getBoundingClientRect();
+    if (!hero || !em || !hero.height) return 'inset(62% 50% 38% 50% round 28px)';
+    const x = ((em.left + em.width / 2 - hero.left) / hero.width) * 100;
+    const y = ((em.top + em.height * 0.3 - hero.top) / hero.height) * 100;
+    return `inset(${y}% ${100 - x}% ${100 - y}% ${x}% round 28px)`;
+  };
+
   // Scroll choreography. Rebuilt when data that changes layout (categories / products) arrives.
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return undefined;
     const ctx = gsap.context(() => {
-      // 1. Hero: pin + expand media from a card to full-bleed, title drifts up.
+      // 1. Hero: pin + reveal media (hidden at first) out to full-bleed, title drifts up.
       gsap
         .timeline({
-          scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=120%', scrub: 1, pin: true },
+          scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=120%', scrub: 1, pin: true, invalidateOnRefresh: true },
         })
         .fromTo(
           '.hero__media',
-          { clipPath: 'inset(42% 30% 6% 30% round 28px)' },
+          { clipPath: emblemReveal }, // opens out of the emblem's sparkle
           { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none' }
         )
         .fromTo('.hero__media img', { scale: 1.35 }, { scale: 1, ease: 'none' }, 0)
-        .to('.hero__title', { yPercent: -60, opacity: 0, ease: 'none' }, 0)
+        .to('.hero__scene', { opacity: 0, scale: 1.12, ease: 'none' }, 0)
         .to('.hero__meta', { opacity: 0, ease: 'none' }, 0)
         .from('.hero__caption', { opacity: 0, y: 40, ease: 'none' }, 0.5);
 
@@ -159,7 +175,7 @@ export default function Home() {
       steps.forEach((step, i) => {
         if (i > 0) atl.fromTo(step, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.4 }, i - 0.2);
         if (i < steps.length - 1) atl.to(step, { opacity: 0, y: -60, duration: 0.4 }, i + 0.6);
-        atl.fromTo(`.anatomy__dot:nth-child(${i + 1})`, { scale: 1 }, { scale: 1.8, backgroundColor: '#c6ff3d', duration: 0.3 }, i);
+        atl.fromTo(`.anatomy__dot:nth-child(${i + 1})`, { scale: 1 }, { scale: 1.8, backgroundColor: '#b46cff', boxShadow: '0 0 12px #b46cff', duration: 0.3 }, i);
       });
 
       // 6. Featured grid: alternate columns drift at different speeds.
@@ -209,10 +225,8 @@ export default function Home() {
           <span className="eyebrow">( PC hardware, curated )</span>
           <span className="eyebrow">Est. 2026 — Bengaluru, IN</span>
         </div>
-        <h1 className="hero__title">
-          <span className="line"><Chars text="Built" /></span>
-          <span className="line line--indent"><Chars text="different." /></span>
-        </h1>
+        <h1 className="sr-only">Built different.</h1>
+        <HeroScene />
         <div className="hero__media">
           <img src={HERO_IMG} alt="A custom gaming PC glowing on a desk" />
           <div className="hero__caption">

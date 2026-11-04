@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
+import Logo from '../../components/Logo.jsx';
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', icon: '◧', end: true },
@@ -18,7 +19,7 @@ export default function AdminLayout() {
   return (
     <div className={`admin ${open ? 'nav-open' : ''}`}>
       <aside className="admin__side">
-        <Link to="/" className="logo">the<b>secret</b>shop</Link>
+        <Logo scrollTop={false} />
         <span className="admin__tag">Admin</span>
         <nav>
           {NAV.map((n) => (

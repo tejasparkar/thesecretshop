@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getLenis } from '../hooks/useSmoothScroll.js';
 import Magnetic from './Magnetic.jsx';
+import Logo from './Logo.jsx';
 
 export default function Header({ categories = [] }) {
   const { totals, setOpen } = useCart();
@@ -38,9 +39,7 @@ export default function Header({ categories = [] }) {
   return (
     <>
       <header className={`header ${hidden ? 'is-hidden' : ''} ${scrolled ? 'is-scrolled' : ''}`}>
-        <Link to="/" className="logo" data-cursor="Home">
-          the<b>secret</b>shop<sup>®</sup>
-        </Link>
+        <Logo />
 
         <nav className="header__nav">
           <NavLink to="/shop">Shop</NavLink>
