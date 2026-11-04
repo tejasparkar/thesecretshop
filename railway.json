@@ -1,8 +1,5 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
-  "build": {
-    "buildCommand": "npm install --prefix server --omit=dev"
-  },
   "deploy": {
     "startCommand": "NODE_ENV=production npm start",
     "healthcheckPath": "/api/health",
