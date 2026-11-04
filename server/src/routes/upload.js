@@ -27,7 +27,9 @@ const upload = multer({
 const router = Router();
 
 router.post('/', protect, adminOnly, upload.array('images', 8), (req, res) => {
-  res.status(201).json({ urls: req.files.map((f) => `/uploads/${f.filename}`) });
+  // Absolute URLs so images load when the frontend is hosted on another domain (e.g. GitHub Pages).
+  const origin = (process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '');
+  res.status(201).json({ urls: req.files.map((f) => `${origin}/uploads/${f.filename}`) });
 });
 
 export { uploadDir };

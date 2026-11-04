@@ -24,7 +24,15 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+// Railway terminates TLS at its proxy; trust it so req.protocol is https.
+app.set('trust proxy', 1);
+
+// CLIENT_URL may be a comma-separated list of allowed origins (no paths), e.g. https://tejasparkar.github.io
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: '1mb' }));
 if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'));
 
