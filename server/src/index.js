@@ -52,8 +52,9 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 connectDB()
-  .then(async ({ inMemory }) => {
-    if (inMemory) await seedIfEmpty();
+  .then(async () => {
+    // Seeds demo data (incl. admin from ADMIN_EMAIL/ADMIN_PASSWORD) only when the DB has no users.
+    await seedIfEmpty();
     app.listen(PORT, () => console.log(`✔  API running on http://localhost:${PORT}`));
   })
   .catch((err) => {
